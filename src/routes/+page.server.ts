@@ -1,0 +1,32 @@
+import type { Actions } from './$types'
+import { sendBack, sendClick, sendDown, sendLeft, sendPlayPause, sendRight, sendUp, sendVolumeDown, sendVolumeUp, submitPin } from '$lib/server/atv'
+
+export const actions = {
+  playPause: async () => {
+    await sendPlayPause()
+    return { ok: true }
+  },
+  back: async () => {
+    await sendBack()
+    return { ok: true }
+  },
+  volumeUp: async () => {
+    await sendVolumeUp()
+    return { ok: true }
+  },
+  volumeDown: async () => {
+    await sendVolumeDown()
+    return { ok: true }
+  },
+  up: async () => { await sendUp(); return { ok: true } },
+  down: async () => { await sendDown(); return { ok: true } },
+  left: async () => { await sendLeft(); return { ok: true } },
+  right: async () => { await sendRight(); return { ok: true } },
+  click: async () => { await sendClick(); return { ok: true } },
+  submitPin: async ({ request }) => {
+    const data = await request.formData()
+    const pin = String(data.get('pin') ?? '').trim()
+    submitPin(pin)
+    return { ok: true }
+  }
+} satisfies Actions
