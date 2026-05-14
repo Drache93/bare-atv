@@ -75,6 +75,10 @@ export async function sendVolumeDown(): Promise<void> {
   await getRemote().volumeDown()
 }
 
+export async function sendClick(): Promise<void> {
+  await getRemote().click()
+}
+
 export async function sendUp(): Promise<void> {
   await getRemote().up()
 }
@@ -91,6 +95,6 @@ export async function sendRight(): Promise<void> {
   await getRemote().right()
 }
 
-export async function sendClick(): Promise<void> {
-  await getRemote().click()
+export async function sendSwipe(direction: 'up' | 'down' | 'left' | 'right'): Promise<void> {
+  await getRemote().swipe(direction)
 }
