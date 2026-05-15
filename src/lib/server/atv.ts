@@ -23,9 +23,8 @@ export function getAtvState(): AtvState {
   return g.__atvState ?? null
 }
 
-function getRemote(): Remote {
-  if (g.__atv) return g.__atv
-  g.__atv = new AppleTVRemote({
+function makeRemote(): Remote {
+  const remote = new AppleTVRemote({
     credentialsFile: path.join(dir.persistent(), 'credentials.json'),
     host: '192.168.178.59',
     port: 49153,
@@ -37,7 +36,18 @@ function getRemote(): Remote {
       })
     }
   })
+  remote.on('error', () => {}) // prevent unhandled error event from crashing Bare
+  return remote
+}
+
+function getRemote(): Remote {
+  if (!g.__atv) g.__atv = makeRemote()
   return g.__atv
+}
+
+function resetRemote(): void {
+  g.__atv = undefined
+  g.__atvPin = null
 }
 
 export function submitPin(pin: string): void {
@@ -47,16 +57,30 @@ export function submitPin(pin: string): void {
 
 export function warmAtv(): void {
   const remote = getRemote()
+  const timer = setTimeout(() => {
+    resetRemote()
+    g.__atvState = { type: 'error', message: 'Connection timed out — check device is on the same network' }
+    atvHub.emit('atvError', { message: (g.__atvState as { message: string }).message })
+  }, 30_000)
   remote
     .ready()
     .then(() => {
+      clearTimeout(timer)
       g.__atvState = { type: 'ready', name: remote.name ?? undefined }
       atvHub.emit('status', { paired: true, name: remote.name })
     })
     .catch((err: Error) => {
+      clearTimeout(timer)
+      resetRemote()
       g.__atvState = { type: 'error', message: err.message }
       atvHub.emit('atvError', { message: err.message })
     })
+}
+
+export function retryAtv(): void {
+  resetRemote()
+  g.__atvState = null
+  warmAtv()
 }
 
 export async function sendPlayPause(): Promise<void> {

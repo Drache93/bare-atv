@@ -1,5 +1,5 @@
 import type { Actions } from './$types'
-import { sendBack, sendClick, sendDown, sendLeft, sendPlayPause, sendRight, sendSwipe, sendUp, sendVolumeDown, sendVolumeUp, submitPin } from '$lib/server/atv'
+import { retryAtv, sendBack, sendClick, sendDown, sendLeft, sendPlayPause, sendRight, sendSwipe, sendUp, sendVolumeDown, sendVolumeUp, submitPin } from '$lib/server/atv'
 
 export const actions = {
   playPause: async () => {
@@ -29,6 +29,7 @@ export const actions = {
     await sendSwipe(direction)
     return { ok: true }
   },
+  retry: async () => { retryAtv(); return { ok: true } },
   submitPin: async ({ request }) => {
     const data = await request.formData()
     const pin = String(data.get('pin') ?? '').trim()

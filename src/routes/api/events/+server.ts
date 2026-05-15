@@ -29,6 +29,9 @@ export const GET: RequestHandler = () => {
       atvHub.on('status', onStatus)
       atvHub.on('atvError', onError)
 
+      // Android WebView buffers SSE until ~4KB — flush it immediately
+      controller.enqueue(encoder.encode(': ' + ' '.repeat(2048) + '\n\n'))
+
       // Replay current state so late-connecting clients don't stay stuck
       const current = getAtvState()
       if (current?.type === 'ready') send('status', { paired: true, name: current.name })

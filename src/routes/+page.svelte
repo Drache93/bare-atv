@@ -1,6 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
+  import { tap } from '$lib/tap';
 
   type Status = 'connecting' | 'pin' | 'ready' | 'error';
 
@@ -72,6 +73,12 @@
       errorMsg = data.message;
       status = 'error';
     });
+    es.onerror = () => {
+      if (status === 'connecting') {
+        errorMsg = 'Could not reach server';
+        status = 'error';
+      }
+    };
     return () => es.close();
   });
 </script>
@@ -97,14 +104,15 @@
           name="pin"
           type="text"
           inputmode="numeric"
-          maxlength="6"
+          maxlength="4"
           autocomplete="off"
-          placeholder="000000"
+          placeholder="0000"
           class="w-40 h-14 rounded-2xl bg-white/[0.07] border border-white/[0.15] text-white text-2xl font-mono text-center tracking-[0.3em] placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all"
         />
         <button
           type="submit"
-          class="h-12 w-40 rounded-full bg-white text-black text-[15px] font-semibold cursor-pointer transition-all active:scale-95 active:opacity-80"
+          use:tap
+          class="h-12 w-40 rounded-full bg-white text-black text-[15px] font-semibold cursor-pointer transition-all [&.active]:scale-95 [&.active]:opacity-80"
         >
           Pair
         </button>
@@ -141,8 +149,9 @@
         <button
           type="submit"
           disabled={dimmed}
+          use:tap
           aria-label="Play/Pause"
-          class="w-[112px] h-[56px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 active:scale-95 active:bg-white/15 hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
+          class="w-[112px] h-[56px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
         >
           {#if playing}
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[17px] h-[17px]">
@@ -161,8 +170,9 @@
         <button
           type="submit"
           disabled={dimmed}
+          use:tap
           aria-label="Back"
-          class="h-[56px] w-[112px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 active:scale-95 active:bg-white/15 hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
+          class="h-[56px] w-[112px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
             <path d="M15 18l-6-6 6-6"/>
@@ -174,8 +184,8 @@
     <!-- Volume -->
     <div class="flex gap-3">
       <form method="POST" action="?/volumeDown" use:enhance={() => async ({ update }) => { await update({ reset: false }); }}>
-        <button type="submit" disabled={dimmed} aria-label="Volume down"
-          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 active:scale-95 active:bg-white/15 hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+        <button use:tap type="submit" disabled={dimmed} aria-label="Volume down"
+          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <line x1="15" y1="12" x2="21" y2="12"/>
@@ -183,8 +193,8 @@
         </button>
       </form>
       <form method="POST" action="?/volumeUp" use:enhance={() => async ({ update }) => { await update({ reset: false }); }}>
-        <button type="submit" disabled={dimmed} aria-label="Volume up"
-          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 active:scale-95 active:bg-white/15 hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+        <button use:tap type="submit" disabled={dimmed} aria-label="Volume up"
+          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
@@ -194,11 +204,32 @@
       </form>
     </div>
 
-    {#if status === 'error'}
-      <p class="text-red-400/50 text-xs mt-2">{errorMsg}</p>
-    {:else if status === 'connecting'}
+    {#if status === 'connecting'}
       <p class="text-white/20 text-xs mt-2">Connecting…</p>
     {/if}
+  {/if}
+
+  {#if status === 'error'}
+    <div class="flex flex-col items-center gap-3 mt-2">
+      <p class="text-red-400/50 text-xs text-center max-w-[220px] leading-relaxed">{errorMsg}</p>
+      <form
+        method="POST"
+        action="?/retry"
+        use:enhance={() => {
+          status = 'connecting';
+          errorMsg = null;
+          return async ({ update }) => { await update({ reset: false }); };
+        }}
+      >
+        <button
+          use:tap
+          type="submit"
+          class="h-10 px-6 rounded-full bg-white/[0.07] border border-white/[0.12] text-white/60 text-[14px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 [-webkit-tap-highlight-color:transparent]"
+        >
+          Retry
+        </button>
+      </form>
+    </div>
   {/if}
 
 </div>
