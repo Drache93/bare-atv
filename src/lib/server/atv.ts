@@ -26,8 +26,6 @@ export function getAtvState(): AtvState {
 function makeRemote(): Remote {
   const remote = new AppleTVRemote({
     credentialsFile: path.join(dir.persistent(), 'credentials.json'),
-    host: '192.168.178.59',
-    port: 49153,
     onpin: () => {
       g.__atvState = { type: 'pinNeeded' }
       atvHub.emit('pinNeeded')
@@ -117,6 +115,14 @@ export async function sendLeft(): Promise<void> {
 
 export async function sendRight(): Promise<void> {
   await getRemote().right()
+}
+
+export async function sendHome(): Promise<void> {
+  await (getRemote() as any).home()
+}
+
+export async function sendSettings(): Promise<void> {
+  await (getRemote() as any).settings()
 }
 
 export async function sendSwipe(direction: 'up' | 'down' | 'left' | 'right'): Promise<void> {

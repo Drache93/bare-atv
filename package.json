@@ -7,6 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "bare test/index.js",
     "format": "prettier --write .",
     "lint": "prettier --check .",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -18,9 +19,14 @@
     "path": {
       "bare": "bare-path",
       "default": "path"
+    },
+    "#wifi": {
+      "android": "bare-wifi-android",
+      "default": "./src/lib/server/wifi-noop.js"
     }
   },
   "devDependencies": {
+    "brittle": "^3.19.1",
     "@sveltejs/kit": "^2.21.4",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tailwindcss/vite": "^4.3.0",
@@ -37,6 +43,7 @@
   },
   "dependencies": {
     "bare-appletv-remote": "file:../bare-appletv-remote",
+    "bare-wifi-android": "file:../bare-wifi-android",
     "bare-path": "^3.0.0",
     "bare-storage": "^1.1.0",
     "bare-crypto": "^1.13.6",

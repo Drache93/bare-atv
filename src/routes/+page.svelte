@@ -39,7 +39,6 @@
     const absDy = Math.abs(dy);
 
     if (absDx < 20 && absDy < 20) {
-      // Tap — use quadrant of initial touch position
       const absRelX = Math.abs(startRelX);
       const absRelY = Math.abs(startRelY);
       let action: string;
@@ -52,13 +51,14 @@
       }
       await fetch(`?/${action}`, { method: 'POST', body: new FormData() });
     } else {
-      // Swipe — use movement direction
       const dir = absDx > absDy ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
       const fd = new FormData();
       fd.set('direction', dir);
       await fetch('?/swipe', { method: 'POST', body: fd });
     }
   }
+
+  const postAction = () => async ({ update }: any) => { await update({ reset: false }); };
 
   onMount(() => {
     const es = new EventSource('/api/events');
@@ -136,72 +136,84 @@
       </div>
     </div>
 
-    <!-- Play/Pause + Back -->
-    <div class="flex gap-3 mt-1">
-      <form
-        method="POST"
-        action="?/playPause"
-        use:enhance={() => {
-          playing = !playing;
-          return async ({ update }) => { await update({ reset: false }); };
-        }}
-      >
-        <button
-          type="submit"
-          disabled={dimmed}
-          use:tap
-          aria-label="Play/Pause"
-          class="w-[112px] h-[56px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
-        >
-          {#if playing}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[17px] h-[17px]">
-              <rect x="5" y="3" width="4" height="18" rx="1"/>
-              <rect x="15" y="3" width="4" height="18" rx="1"/>
-            </svg>
-          {:else}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[17px] h-[17px] translate-x-px">
-              <polygon points="6 3 20 12 6 21"/>
-            </svg>
-          {/if}
-        </button>
-      </form>
-
-      <form method="POST" action="?/back" use:enhance={() => async ({ update }) => { await update({ reset: false }); }}>
-        <button
-          type="submit"
-          disabled={dimmed}
-          use:tap
-          aria-label="Back"
-          class="h-[56px] w-[112px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none"
-        >
+    <!-- Back | Home -->
+    <div class="flex gap-3">
+      <form method="POST" action="?/back" use:enhance={postAction}>
+        <button use:tap type="submit" disabled={dimmed} aria-label="Back"
+          class="h-[56px] w-[112px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
         </button>
       </form>
+      <form method="POST" action="?/home" use:enhance={postAction}>
+        <button use:tap type="submit" disabled={dimmed} aria-label="Home"
+          class="h-[56px] w-[112px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+            <polyline points="9 21 9 12 15 12 15 21"/>
+          </svg>
+        </button>
+      </form>
     </div>
 
-    <!-- Volume -->
+    <!-- Play/Pause + Vol Up  |  Settings + Vol Down -->
     <div class="flex gap-3">
-      <form method="POST" action="?/volumeDown" use:enhance={() => async ({ update }) => { await update({ reset: false }); }}>
-        <button use:tap type="submit" disabled={dimmed} aria-label="Volume down"
-          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <line x1="15" y1="12" x2="21" y2="12"/>
-          </svg>
-        </button>
-      </form>
-      <form method="POST" action="?/volumeUp" use:enhance={() => async ({ update }) => { await update({ reset: false }); }}>
-        <button use:tap type="submit" disabled={dimmed} aria-label="Volume up"
-          class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </button>
-      </form>
+      <!-- Left column: Play/Pause, Settings -->
+      <div class="flex flex-col gap-3">
+        <form method="POST" action="?/playPause"
+          use:enhance={() => {
+            playing = !playing;
+            return async ({ update }) => { await update({ reset: false }); };
+          }}
+        >
+          <button use:tap type="submit" disabled={dimmed} aria-label="Play/Pause"
+            class="w-[112px] h-[56px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center gap-2 text-[15px] font-medium cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+            {#if playing}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[17px] h-[17px]">
+                <rect x="5" y="3" width="4" height="18" rx="1"/>
+                <rect x="15" y="3" width="4" height="18" rx="1"/>
+              </svg>
+            {:else}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[17px] h-[17px] translate-x-px">
+                <polygon points="6 3 20 12 6 21"/>
+              </svg>
+            {/if}
+          </button>
+        </form>
+        <form method="POST" action="?/settings" use:enhance={postAction}>
+          <button use:tap type="submit" disabled={dimmed} aria-label="Settings"
+            class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right column: Vol Up, Vol Down -->
+      <div class="flex flex-col gap-3">
+        <form method="POST" action="?/volumeUp" use:enhance={postAction}>
+          <button use:tap type="submit" disabled={dimmed} aria-label="Volume up"
+            class="w-[112px] h-[56px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
+        </form>
+        <form method="POST" action="?/volumeDown" use:enhance={postAction}>
+          <button use:tap type="submit" disabled={dimmed} aria-label="Volume down"
+            class="w-[112px] h-[52px] rounded-full bg-white/[0.07] border border-white/[0.12] text-white/85 flex items-center justify-center cursor-pointer transition-all duration-100 [&.active]:scale-95 [&.active]:bg-white/[0.15] hover:bg-white/10 hover:border-white/20 [-webkit-tap-highlight-color:transparent] disabled:opacity-25 disabled:pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <line x1="15" y1="12" x2="21" y2="12"/>
+            </svg>
+          </button>
+        </form>
+      </div>
     </div>
 
     {#if status === 'connecting'}
