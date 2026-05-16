@@ -57,7 +57,10 @@ export function warmAtv(): void {
   const remote = getRemote()
   const timer = setTimeout(() => {
     resetRemote()
-    g.__atvState = { type: 'error', message: 'Connection timed out — check device is on the same network' }
+    g.__atvState = {
+      type: 'error',
+      message: 'Connection timed out — check device is on the same network'
+    }
     atvHub.emit('atvError', { message: (g.__atvState as { message: string }).message })
   }, 30_000)
   remote
